@@ -381,6 +381,9 @@ extern VideoBootStrap DUMMY_bootstrap;
 #if SDL_VIDEO_DRIVER_WAYLAND
 extern VideoBootStrap Wayland_bootstrap;
 #endif
+#if SDL_VIDEO_DRIVER_MX6
+extern VideoBootStrap MX6_bootstrap;
+#endif
 
 extern SDL_VideoDevice *SDL_GetVideoDevice(void);
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);

@@ -26,6 +26,11 @@
  */
 #ifndef _MSC_VER
 
+/* Definition for proper compilation with Vivante GPU SDK */
+#ifdef SDL_VIDEO_DRIVER_MX6
+#define EGL_API_FB
+#endif
+ 
 #include <EGL/egl.h>
 
 #else /* _MSC_VER */
