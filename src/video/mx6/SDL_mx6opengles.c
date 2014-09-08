@@ -53,7 +53,6 @@ MX6_GLES_LoadLibrary(_THIS, const char *egl_path) {
        Just left them as is for compatibility */
     void *dll_handle = NULL, *egl_dll_handle = NULL;
     char *path = NULL;
-    SDL_DisplayData *displaydata;
 
     if (_this->egl_data) {
         return SDL_SetError("OpenGL ES context already created");
@@ -75,7 +74,7 @@ MX6_GLES_LoadLibrary(_THIS, const char *egl_path) {
     }
 
     if (egl_dll_handle == NULL) {
-        if(_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) {
+        if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) {
             if (_this->gl_config.major_version > 1) {
                 path = DEFAULT_OGL_ES2;
                 egl_dll_handle = SDL_LoadObject(path);
@@ -84,11 +83,10 @@ MX6_GLES_LoadLibrary(_THIS, const char *egl_path) {
                 path = DEFAULT_OGL_ES;
                 egl_dll_handle = SDL_LoadObject(path);
             }
-        }      
-        else {
+        } else {
             path = DEFAULT_OGL;
             egl_dll_handle = SDL_LoadObject(path);
-        }     
+        }
     }
     _this->egl_data->egl_dll_handle = egl_dll_handle;
 
@@ -98,8 +96,8 @@ MX6_GLES_LoadLibrary(_THIS, const char *egl_path) {
 
     if (egl_path != NULL) {
         dll_handle = SDL_LoadObject(egl_path);
-    }   
-    
+    }
+
     if (SDL_LoadFunction(dll_handle, "eglChooseConfig") == NULL) {
         if (dll_handle != NULL) {
             SDL_UnloadObject(dll_handle);
@@ -148,21 +146,15 @@ MX6_GLES_LoadLibrary(_THIS, const char *egl_path) {
     LOAD_VIV_FUNC(fbGetPixmapGeometry);
     LOAD_VIV_FUNC(fbGetPixmapInfo);
     LOAD_VIV_FUNC(fbDestroyPixmap);
-   
-    displaydata = SDL_GetDisplayDriverData(0);
-    displaydata->native_display = egl_viv_data->fbGetDisplayByIndex(0);
-    egl_viv_data->fbGetDisplayGeometry(displaydata->native_display, &displaydata->width, &displaydata->height);
 
-    _this->egl_data->egl_display = _this->egl_data->eglGetDisplay(displaydata->native_display);
+    _this->egl_data->egl_display = _this->egl_data->eglGetDisplay(egl_viv_data->fbGetDisplayByIndex(0));
     if (!_this->egl_data->egl_display) {
         return SDL_SetError("Could not get EGL display");
     }
-    
+
     if (_this->egl_data->eglInitialize(_this->egl_data->egl_display, NULL, NULL) != EGL_TRUE) {
         return SDL_SetError("Could not initialize EGL");
     }
-
-    displaydata->egl_display = _this->egl_data->egl_display;
 
     _this->gl_config.driver_loaded = 1;
 
@@ -171,7 +163,7 @@ MX6_GLES_LoadLibrary(_THIS, const char *egl_path) {
     } else {
         *_this->gl_config.driver_path = '\0';
     }
-    
+
     return 0;
 }
 
@@ -192,7 +184,7 @@ MX6_GLES_UnloadLibrary(_THIS)
             SDL_UnloadObject(_this->egl_data->egl_dll_handle);
             _this->egl_data->egl_dll_handle = NULL;
         }
-        
+
         SDL_free(_this->egl_data);
         _this->egl_data = NULL;
 
