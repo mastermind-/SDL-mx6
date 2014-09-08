@@ -34,9 +34,6 @@ typedef struct SDL_VideoData
 typedef struct SDL_DisplayData
 {
     EGLNativeDisplayType native_display;
-    EGLDisplay egl_display;
-    int width;
-    int height;
 } SDL_DisplayData;
 
 typedef struct SDL_WindowData

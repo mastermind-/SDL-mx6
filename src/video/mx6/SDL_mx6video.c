@@ -133,16 +133,20 @@ MX6_VideoInit(_THIS)
     SDL_VideoDisplay display;
     SDL_DisplayMode current_mode;
     SDL_DisplayData *data;
-    
+
+    if (SDL_GL_LoadLibrary(NULL) < 0) {
+        return -1;
+    }
+
     data = (SDL_DisplayData *) SDL_calloc(1, sizeof(SDL_DisplayData));
     if (data == NULL) {
         return SDL_OutOfMemory();
     }
-    
-    /* Actual data will be set in SDL_GL_LoadLibrary call below */
+
+    data->native_display = egl_viv_data->fbGetDisplayByIndex(0);
+
     SDL_zero(current_mode);
-    current_mode.w = 0;
-    current_mode.h = 0;
+    egl_viv_data->fbGetDisplayGeometry(data->native_display, &current_mode.w, &current_mode.h);
     current_mode.refresh_rate = 60;
     current_mode.format = SDL_PIXELFORMAT_RGB565;
     current_mode.driverdata = NULL;
@@ -153,13 +157,9 @@ MX6_VideoInit(_THIS)
     display.driverdata = data;
     SDL_AddVideoDisplay(&display);
 
-    if (SDL_GL_LoadLibrary(NULL) < 0) {
-        return -1;
-    }
-
-#ifdef SDL_INPUT_LINUXEV    
+#ifdef SDL_INPUT_LINUXEV
     SDL_EVDEV_Init();
-#endif    
+#endif
 
     return 1;
 }
@@ -167,9 +167,9 @@ MX6_VideoInit(_THIS)
 void
 MX6_VideoQuit(_THIS)
 {
-#ifdef SDL_INPUT_LINUXEV    
+#ifdef SDL_INPUT_LINUXEV
     SDL_EVDEV_Quit();
-#endif    
+#endif
 }
 
 void
@@ -190,9 +190,9 @@ MX6_CreateWindow(_THIS, SDL_Window * window)
 {
     SDL_DisplayData *displaydata;
     SDL_WindowData *wdata;
-    
+
     displaydata = SDL_GetDisplayDriverData(0);
-    
+
     /* Allocate window internal data */
     wdata = (SDL_WindowData *) SDL_calloc(1, sizeof(SDL_WindowData));
     if (wdata == NULL) {
@@ -202,7 +202,7 @@ MX6_CreateWindow(_THIS, SDL_Window * window)
     /* Setup driver data for this window */
     window->driverdata = wdata;
     window->flags |= SDL_WINDOW_OPENGL;
-    
+
     if (!_this->egl_data) {
         return -1;
     }
@@ -225,7 +225,7 @@ void
 MX6_DestroyWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *wdata;
-    
+
     wdata = window->driverdata;
     if (wdata) {
         SDL_EGL_DestroySurface(_this, wdata->egl_surface);
